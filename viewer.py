@@ -55,12 +55,13 @@ def init():
     glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
     glLoadIdentity()
 
+    objects['ninja'] = OBJ('./meshes/chibi.obj', swapyz=True)
 
-    objects = OBJ('./meshes/chibi.obj', swapyz=True)
+    objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
 
-    # objects['ninja'] = OBJ('./meshes/chibi.obj', swapyz=True)
-    # objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
+    objects['chair'] = OBJ('./meshes/Gaming_Chair.obj', swapyz=True)
     
+    objects['floor'] = OBJ('./meshes/floor.obj', swapyz=True)
     # for _, obj in objects.items():
     #     obj.generate()
 
@@ -68,6 +69,7 @@ def init():
     # objects['monkey'].loadTexture('./meshes/monkey.jpg')
 
 def display():
+    global rx, ry, tz, tx, ty
     global objects, view_mat
 
     # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -95,7 +97,21 @@ def display():
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
     # objects['monkey'].render()
-    glCallList(objects.gl_list)
+    # for objeto in objects:
+    #     glCallList(objects[objeto].gl_list)
+    glCallList(objects['ninja'].gl_list)
+
+    glTranslatef(tx+5,tz,ty+2)
+    glCallList(objects['monkey'].gl_list)
+
+
+    glTranslatef(tx,tz,ty-2)
+    glCallList(objects['floor'].gl_list)
+    
+    glTranslatef(tx-20,tz,ty)
+    glScalef(0.2,0.2,0.2)
+    glCallList(objects['chair'].gl_list)
+
     glPopMatrix()
 
 def update():
