@@ -55,36 +55,12 @@ def init():
     glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
     glLoadIdentity()
 
-    objects['ninja'] = OBJ('./meshes/chibi.obj', swapyz=True)
-
-    objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
-
-    objects['chair'] = OBJ('./meshes/Gaming_Chair.obj', swapyz=True)
-    
-    objects['floor'] = OBJ('./meshes/floor.obj', swapyz=True)
-    # for _, obj in objects.items():
-    #     obj.generate()
-
-    # objects['ninja'].loadTexture('./textures/chibi.png')
-    # objects['monkey'].loadTexture('./meshes/monkey.jpg')
+    for _, obj in objects.items():
+        obj.generate()
 
 def display():
     global rx, ry, tz, tx, ty
     global objects, view_mat
-
-    # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    # glLoadIdentity()
-
-    # # RENDER OBJECT
-    # glTranslate(tx/20., ty/20., - tz)
-    # glRotate(ry, 1, 0, 0)
-    # glRotate(rx, 0, 1, 0)
-    # objects['chair'].render()
-
-    # glTranslate(tx/20., ty/20., - tz)
-    # glRotate(ry, 1, 0, 0)
-    # glRotate(rx, 0, 1, 0)
-    # objects['monkey'].render()
 
     glPushMatrix()
     glLoadIdentity()
@@ -96,21 +72,29 @@ def display():
     glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-    # objects['monkey'].render()
-    # for objeto in objects:
-    #     glCallList(objects[objeto].gl_list)
-    glCallList(objects['ninja'].gl_list)
 
+    glBindTexture(
+        GL_TEXTURE_2D,
+        objects['matheus'].loadTexture('./meshes/minhacabeca.png')
+    )
+    objects['matheus'].render()
+
+    
     glTranslatef(tx+5,tz,ty+2)
-    glCallList(objects['monkey'].gl_list)
+    glBindTexture(
+        GL_TEXTURE_2D,
+        objects['monkey'].loadTexture('./meshes/monkey.jpg')
+    )
+    objects['monkey'].render()
 
 
     glTranslatef(tx,tz,ty-2)
-    glCallList(objects['floor'].gl_list)
+    glColor(1,1,1)
+    objects['floor'].render()
     
     glTranslatef(tx-20,tz,ty)
     glScalef(0.2,0.2,0.2)
-    glCallList(objects['chair'].gl_list)
+    objects['chair'].render()
 
     glPopMatrix()
 
@@ -168,53 +152,16 @@ def inputEvents():
             elif event.key == pygame.K_DOWN  and rx > 0:
                 rx = 0.0
 
-        # elif event.type == MOUSEBUTTONDOWN:
-        #     if event.button == 4: tz = max(1, tz-1)
-        #     elif event.button == 5: tz += 1
-        #     elif event.button == 1: rotate = True
-        #     elif event.button == 3: move = True
-        # elif event.type == MOUSEBUTTONUP:
-        #     if event.button == 1: rotate = False
-        #     elif event.button == 3: move = False
-        # elif event.type == MOUSEMOTION:
-        #     i, j = event.rel
-        #     if rotate:
-        #         rx += i
-        #         ry += j
-        #     if move:
-        #         tx += i
-        #         ty -= j
-
-
-
-    # for e in pygame.event.get():
-    #     if e.type == QUIT:
-    #         sys.exit()
-    #     elif e.type == KEYDOWN and e.key == K_ESCAPE:
-    #         sys.exit()
-    #     elif e.type == MOUSEBUTTONDOWN:
-    #         if e.button == 4: tz = max(1, tz-1)
-    #         elif e.button == 5: tz += 1
-    #         elif e.button == 1: rotate = True
-    #         elif e.button == 3: move = True
-    #     elif e.type == MOUSEBUTTONUP:
-    #         if e.button == 1: rotate = False
-    #         elif e.button == 3: move = False
-    #     elif e.type == MOUSEMOTION:
-    #         i, j = e.rel
-    #         if rotate:
-    #             rx += i
-    #             ry += j
-    #         if move:
-    #             tx += i
-    #             ty -= j
-
 def main():
     global objects
-    # objects['ninja'] = OBJ('./meshes/chibi.obj', swapyz=True)
-    # objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
+
+    objects['matheus'] = OBJ('./meshes/minhacabeca.obj', swapyz=True)
+    objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
+    objects['floor'] = OBJ('./meshes/floor.obj', swapyz=True)
+    objects['chair'] = OBJ('./meshes/Gaming_Chair.obj', swapyz=True)
     
     init()
+
     update()
 
 main()

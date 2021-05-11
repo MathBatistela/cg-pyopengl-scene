@@ -1,73 +1,96 @@
-import pygame
+#!/usr/bin/env python
+# Basic OBJ file viewer. needs objloader from:
+#  http://www.pygame.org/wiki/OBJFileLoader
+# LMB + move: rotate
+# RMB + move: pan
+# Scroll wheel: zoom in/out
+import sys, pygame
 from pygame.locals import *
-
+from pygame.constants import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
+# IMPORT OBJECT LOADER
 from objloader import *
 
-import numpy
+pygame.init()
+viewport = (800,600)
+hx = viewport[0]/2
+hy = viewport[1]/2
+srf = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF)
 
-def IdentityMat44(): return numpy.matrix(numpy.identity(4), copy=False, dtype='float32')
+glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
+glEnable(GL_LIGHT0)
+glEnable(GL_LIGHTING)
+glEnable(GL_COLOR_MATERIAL)
+glEnable(GL_DEPTH_TEST)
+glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
 
-def main():
-    pygame.init()
-    tx = 0
-    ty = 0
-    tz = 0
-    ry = 0
+# LOAD OBJECT AFTER PYGAME INIT
+obj = OBJ('minhacabeca.obj', swapyz=True)
+obj1_tex = obj.loadTexture('minhacabeca.png')
 
-    viewport = (800,600)
-    width, height = viewport
-    srf = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF)
 
-    glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, (width/float(height)), 0.1, 50.0)
+obj.generate()
 
-    view_mat = IdentityMat44()
-    glMatrixMode(GL_MODELVIEW)
+obj2 = OBJ('./meshes/monkey.obj', swapyz=True)
+
+obj2_tex = obj2.loadTexture('./meshes/monkey.jpg')
+obj2.generate()
+
+clock = pygame.time.Clock()
+
+glMatrixMode(GL_PROJECTION)
+glLoadIdentity()
+width, height = viewport
+gluPerspective(90.0, width/float(height), 1, 100.0)
+glEnable(GL_DEPTH_TEST)
+glMatrixMode(GL_MODELVIEW)
+
+rx, ry = (0,0)
+tx, ty = (0,0)
+zpos = 5
+rotate = move = False
+while 1:
+    clock.tick(30)
+    for e in pygame.event.get():
+        if e.type == QUIT:
+            sys.exit()
+        elif e.type == KEYDOWN and e.key == K_ESCAPE:
+            sys.exit()
+        elif e.type == MOUSEBUTTONDOWN:
+            if e.button == 4: zpos = max(1, zpos-1)
+            elif e.button == 5: zpos += 1
+            elif e.button == 1: rotate = True
+            elif e.button == 3: move = True
+        elif e.type == MOUSEBUTTONUP:
+            if e.button == 1: rotate = False
+            elif e.button == 3: move = False
+        elif e.type == MOUSEMOTION:
+            i, j = e.rel
+            if rotate:
+                rx += i
+                ry += j
+            if move:
+                tx += i
+                ty -= j
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
-    glTranslatef(0, 0, -5)
-    glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
-    glLoadIdentity()
-    obj = OBJ('chibi.obj', swapyz=True)
-    obj.generate()
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
+    # RENDER OBJECT
+    glTranslate(tx/20., ty/20., - zpos)
+    glRotate(ry, 1, 0, 0)
+    glRotate(rx, 0, 1, 0)
+    glBindTexture(GL_TEXTURE_2D, obj1_tex )
+    obj.render()
 
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    quit()
-                if   event.key == pygame.K_a:     tx =  0.1
-                elif event.key == pygame.K_d:     tx = -0.1
-                elif event.key == pygame.K_w:     tz =  0.1
-                elif event.key == pygame.K_s:     tz = -0.1
-                elif event.key == pygame.K_RIGHT: ry =  1.0
-                elif event.key == pygame.K_LEFT:  ry = -1.0
-            elif event.type == pygame.KEYUP: 
-                if   event.key == pygame.K_a     and tx > 0: tx = 0
-                elif event.key == pygame.K_d     and tx < 0: tx = 0
-                elif event.key == pygame.K_w     and tz > 0: tz = 0
-                elif event.key == pygame.K_s     and tz < 0: tz = 0
-                elif event.key == pygame.K_RIGHT and ry > 0: ry = 0.0
-                elif event.key == pygame.K_LEFT  and ry < 0: ry = 0.0
+    glTranslate(tx/20., ty/20., - zpos + 5)
+    glRotate(ry, 1, 0, 0)
+    glRotate(rx, 0, 1, 0)
+    glBindTexture(GL_TEXTURE_2D, obj2_tex )
+    obj2.render()
 
-        glPushMatrix()
-        glLoadIdentity()
-        glTranslatef(tx,ty,tz)
-        glRotatef(ry, 0, 1, 0)
-        glMultMatrixf(view_mat)
-
-        glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
-
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        obj.render()
-        glPopMatrix()
-
-        pygame.display.flip()
-        pygame.time.wait(10)
-main()
+    pygame.display.flip()
