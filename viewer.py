@@ -48,15 +48,24 @@ def init():
   
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    glTranslatef(0, 0, -5)
+    glTranslatef(0, -10, -20)
+    glRotatef(90, 0, 1, 0)
+    glRotatef(-90, 1, 0, 0)
+    glRotatef(90, 0, 0, 1)
     glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
     glLoadIdentity()
 
-    
-    for _, obj in objects.items():
-        obj.generate()
 
-    objects['chair'].loadTexture('chibi.png')
+    objects = OBJ('./meshes/chibi.obj', swapyz=True)
+
+    # objects['ninja'] = OBJ('./meshes/chibi.obj', swapyz=True)
+    # objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
+    
+    # for _, obj in objects.items():
+    #     obj.generate()
+
+    # objects['ninja'].loadTexture('./textures/chibi.png')
+    # objects['monkey'].loadTexture('./meshes/monkey.jpg')
 
 def display():
     global objects, view_mat
@@ -79,13 +88,14 @@ def display():
     glLoadIdentity()
     glTranslatef(tx,ty,tz)
     glRotatef(ry, 0, 1, 0)
-    glRotate(rx, 0, 1, 0)
+    glRotate(rx, 1, 0, 0)
     glMultMatrixf(view_mat)
 
     glGetFloatv(GL_MODELVIEW_MATRIX, view_mat)
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-    objects['monkey'].render()
+    # objects['monkey'].render()
+    glCallList(objects.gl_list)
     glPopMatrix()
 
 def update():
@@ -108,23 +118,39 @@ def inputEvents():
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 quit()
-            if   event.key == pygame.K_a:     tx =  0.1
-            elif event.key == pygame.K_d:     tx = -0.1
-            elif event.key == pygame.K_w:     tz =  0.1
-            elif event.key == pygame.K_s:     tz = -0.1
-            elif event.key == pygame.K_RIGHT: ry =  1.0
-            elif event.key == pygame.K_LEFT:  ry = -1.0
-            elif event.key == pygame.K_UP:    rx =  1.0
-            elif event.key == pygame.K_DOWN:  rx = -1.0
+            if   event.key == pygame.K_a:
+                tx =  0.1
+            elif event.key == pygame.K_d:
+                tx = -0.1
+            elif event.key == pygame.K_w:
+                tz =  0.1
+            elif event.key == pygame.K_s:
+                tz = -0.1
+            elif event.key == pygame.K_RIGHT:
+                ry =  1.0
+            elif event.key == pygame.K_LEFT:
+                ry = -1.0
+            elif event.key == pygame.K_UP:
+                rx = -1.0
+            elif event.key == pygame.K_DOWN:
+                rx =  1.0
         elif event.type == pygame.KEYUP: 
-            if   event.key == pygame.K_a     and tx > 0: tx = 0
-            elif event.key == pygame.K_d     and tx < 0: tx = 0
-            elif event.key == pygame.K_w     and tz > 0: tz = 0
-            elif event.key == pygame.K_s     and tz < 0: tz = 0
-            elif event.key == pygame.K_RIGHT and ry > 0: ry = 0.0
-            elif event.key == pygame.K_LEFT  and ry < 0: ry = 0.0
-            elif event.key == pygame.K_UP    and rx > 0: rx = 0.0
-            elif event.key == pygame.K_DOWN  and rx < 0: rx = 0.0
+            if   event.key == pygame.K_a and tx > 0:
+                tx = 0
+            elif event.key == pygame.K_d and tx < 0:
+                tx = 0
+            elif event.key == pygame.K_w and tz > 0:
+                tz = 0
+            elif event.key == pygame.K_s and tz < 0:
+                tz = 0
+            elif event.key == pygame.K_RIGHT and ry > 0:
+                ry = 0.0
+            elif event.key == pygame.K_LEFT  and ry < 0:
+                ry = 0.0
+            elif event.key == pygame.K_UP    and rx < 0:
+                rx = 0.0
+            elif event.key == pygame.K_DOWN  and rx > 0:
+                rx = 0.0
 
         # elif event.type == MOUSEBUTTONDOWN:
         #     if event.button == 4: tz = max(1, tz-1)
@@ -169,8 +195,8 @@ def inputEvents():
 
 def main():
     global objects
-    objects['chair'] = OBJ('chibi.obj', swapyz=True)
-    objects['monkey'] = OBJ('monkey.obj', swapyz=True)
+    # objects['ninja'] = OBJ('./meshes/chibi.obj', swapyz=True)
+    # objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
     
     init()
     update()
