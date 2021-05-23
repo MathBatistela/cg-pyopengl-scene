@@ -1,21 +1,15 @@
-#!/usr/bin/env python
-# Basic OBJ file viewer. needs objloader from:
-#  http://www.pygame.org/wiki/OBJFileLoader
-# LMB + move: rotate
-# RMB + move: pan
-# Scroll wheel: zoom in/out
 import sys, pygame
 from pygame.locals import *
 from pygame.constants import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-# IMPORT OBJECT LOADER
 from objloader import *
 
 rx, ry = (0,0)
 tx, ty = (0,0)
 tz = 0
+angle = 0
 rotate = move = False
 objects = {}
 
@@ -26,7 +20,7 @@ view_mat = IdentityMat44()
 
 
 def init():
-    global objects, view_mat
+    global objects, view_mat, textures
     pygame.init()
     viewport = (800,600)
     srf = pygame.display.set_mode(viewport, OPENGL | DOUBLEBUF)
@@ -58,9 +52,10 @@ def init():
     for _, obj in objects.items():
         obj.generate()
 
+
 def display():
-    global rx, ry, tz, tx, ty
-    global objects, view_mat
+    global rx, ry, tz, tx, ty, angle
+    global objects, view_mat, textures
 
     glPushMatrix()
     glLoadIdentity()
@@ -73,20 +68,8 @@ def display():
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-    glBindTexture(
-        GL_TEXTURE_2D,
-        objects['matheus'].loadTexture('./meshes/minhacabeca.png')
-    )
-    objects['matheus'].render()
-
-    
     glTranslatef(tx+5,tz,ty+2)
-    glBindTexture(
-        GL_TEXTURE_2D,
-        objects['monkey'].loadTexture('./meshes/monkey.jpg')
-    )
     objects['monkey'].render()
-
 
     glTranslatef(tx,tz,ty-2)
     glColor(1,1,1)
@@ -94,8 +77,17 @@ def display():
     
     glTranslatef(tx-20,tz,ty)
     glScalef(0.2,0.2,0.2)
+    glRotatef(angle, 0.0, 0.0, 1.0)
     objects['chair'].render()
 
+    glTranslatef(tx-20,tz,ty)
+    glScalef(4,4,4)
+    glRotatef(angle, 0.0, 0.0, 1.0)
+    objects['cube'].render()
+    angle = angle + 1
+
+    glTranslatef(tx,tz,ty+20)
+    objects['matheus'].render()
     glPopMatrix()
 
 def update():
@@ -156,6 +148,7 @@ def main():
     global objects
 
     objects['matheus'] = OBJ('./meshes/minhacabeca.obj', swapyz=True)
+    objects['cube'] = OBJ('./meshes/cube.obj', swapyz=True)
     objects['monkey'] = OBJ('./meshes/monkey.obj', swapyz=True)
     objects['floor'] = OBJ('./meshes/floor.obj', swapyz=True)
     objects['chair'] = OBJ('./meshes/Gaming_Chair.obj', swapyz=True)
